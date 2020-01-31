@@ -87,7 +87,8 @@ export default class ChildList extends React.Component {
         const resObject = JSON.parse(object);
         const token = resObject.token;
 
-        this.props.navigation.navigate(token ? 'Timetable' : 'Auth')
+        //this.props.navigation.navigate(token ? 'Timetable' : 'Auth')
+        this.props.navigation.navigate(token ? 'Dashboard' : 'Auth')
     }
 
     render() {

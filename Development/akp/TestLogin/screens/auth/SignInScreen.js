@@ -93,9 +93,6 @@ export default class SignInScreen extends React.Component {
     const { loading } = this.state
 
     return (
-
-
-
       <KeyboardAvoidingView style={{ flex: 1 }}
         behavior="padding"
         keyboardVerticalOffset={60}>
@@ -242,7 +239,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   }, statusBar: {
     height: BAR_HEIGHT,
-    backgroundColor : '#ff9900'
+    backgroundColor: '#ff9900'
   },
 
 });

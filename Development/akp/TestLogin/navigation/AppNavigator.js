@@ -6,6 +6,7 @@ import SignInNavigator from './SignInNavigator'
 import AuthLoadingScreen from '../screens/auth/AuthLoadingScreen';
 import TimeTableNavigator from './TimeTableNavigator'
 import ChildList from '../screens/auth/ChildList';
+import DashboardNavigator from './DashboardNavigator';
 
 export default createAppContainer(
   createSwitchNavigator({
@@ -15,7 +16,8 @@ export default createAppContainer(
     Auth: SignInNavigator,
     AuthLoading :  AuthLoadingScreen,
     ChildList : ChildList,
-    Timetable : TimeTableNavigator
+    Timetable : TimeTableNavigator,
+    Dashboard : DashboardNavigator,
   },
   {
     initialRouteName : 'AuthLoading'

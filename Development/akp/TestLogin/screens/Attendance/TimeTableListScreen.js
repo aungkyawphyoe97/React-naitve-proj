@@ -11,12 +11,9 @@ import {
     Dimensions,
 } from 'react-native';
 import { Button } from 'react-native-elements'
-import Touchable from 'react-native-platform-touchable';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from 'react-native-elements';
 import { Platform } from '@unimodules/core';
-
-import { MonoText } from '../../components/StyledText';
 
 const axios = require('axios');
 const BAR_HEIGHT = StatusBar.currentHeight;
@@ -80,11 +77,12 @@ export default class TimTableList extends React.Component {
             'auth': token,
             'schoolid' : '9'
         }
-
+        
         try {
             const response = await axios.post('https://agkt-shmgmt.herokuapp.com/rest/student/class/todaytimetable/',
                 {},
                 { headers: headers });
+            console.log(response.data)
             this.state.timetablelist = response.data
             if (this.mounted) {
                 this.setState({ timetablelist: response.data, loading: false })
@@ -223,8 +221,8 @@ export default class TimTableList extends React.Component {
                                                             marginTop: 10,
                                                         }]}>
                                                             <Button
-                                                                buttonStyle={{ backgroundColor: '#ff9900', height: 40, }}
-                                                                fontSize='20'
+                                                                buttonStyle={{ backgroundColor: '#ff9900', height: 35, }}
+                                                                titleStyle = {{ fontSize : 15,}}
                                                                 title='Get Attendance'
                                                                 onPress={() =>
                                                                     this.checkIn(item.id, item.certificationBatchRep.batchName, item.subjectRep.name, item.teacherRep.name)}
@@ -363,6 +361,8 @@ const styles = StyleSheet.create({
         },
         shadowRadius: 10,
         shadowOpacity: 0.25,
+        borderColor: "#ff9900",
+        borderRadius: 5,
     },
 
 });
