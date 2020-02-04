@@ -11,4 +11,29 @@ export default {
   warningText: '#666804',
   noticeBackground: tintColor,
   noticeText: '#fff',
+  schoolOne: {
+    theme: "one",
+    tintColor,
+    tabIconDefault: '#ccc',
+    tabIconSelected: tintColor,
+    tabBar: '#fefefe',
+    errorBackground: 'red',
+    errorText: '#fff',
+    warningBackground: '#EAEB5E',
+    warningText: '#666804',
+    noticeBackground: tintColor,
+    noticeText: '#fff'
+  },
+  schoolTwo: {
+    tintColor,
+    tabIconDefault: '#ccc',
+    tabIconSelected: tintColor,
+    tabBar: '#fefefe',
+    errorBackground: 'red',
+    errorText: '#fff',
+    warningBackground: '#EAEB5E',
+    warningText: '#666804',
+    noticeBackground: tintColor,
+    noticeText: '#fff'
+  }
 };

@@ -15,6 +15,8 @@ import { Card } from 'react-native-elements';
 import { Platform } from '@unimodules/core';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from 'react-native-elements';
+import Carousel from 'react-native-snap-carousel';
+import { PtSansCaption } from '../../components/StyledText';
 
 const axios = require('axios');
 const BAR_HEIGHT = StatusBar.currentHeight;
@@ -26,7 +28,6 @@ const AppStatusBar = ({ backgroundColor, ...props }) => {
     );
 };
 
-var Carousel = require('react-native-carousel');
 
 
 export default class TimTableList extends React.Component {
@@ -41,6 +42,14 @@ export default class TimTableList extends React.Component {
 
 
     };
+
+    _renderItem({ item, index }) {
+        return (
+            <View style={styles.slide}>
+                <Text style={styles.title}>{item.title}</Text>
+            </View>
+        );
+    }
 
 
     constructor(props) {
@@ -70,6 +79,7 @@ export default class TimTableList extends React.Component {
         this.home = this.home.bind(this)
         this.getChildList = this.getChildList.bind(this)
         this.gettimetable = this.gettimetable.bind(this)
+        this._renderItem = this._renderItem.bind(this)
     }
 
     componentDidMount() {
@@ -89,32 +99,8 @@ export default class TimTableList extends React.Component {
         const headers = {
             'Content-Type': 'application/json',
             'auth': token,
-            'schoolid': '9'
+            'schoolid': '2'
         }
-
-        // try {
-        //     const response = await axios.post('http://192.168.100.6:8080/com.agkt.shmgmt.web.client/rest/student/class/todaytimetable/',
-        //         {},
-        //         { headers: headers });
-        //     console.log(response.data)
-        //     this.state.timetablelist = response.data
-        //     if (this.mounted) {
-        //         this.setState({ timetablelist: response.data, loading: false })
-        //     }
-
-
-        // } catch (error) {
-        //     console.log(error.message)
-        //     if (error.message === "Request failed with status code 401") {
-        //         // login again
-        //         //this.props.navigation.navigate('Auth')
-        //         console.log('login again')
-        //         //this.getChildList(resObject.studentId)
-        //         //this._loadAsync()
-        //     }
-        //     console.log(error)
-        // }
-
 
         try {
             const response = await axios.get('https://agkt-shmgmt.herokuapp.com/rest/student/calendardatelist/',
@@ -130,7 +116,9 @@ export default class TimTableList extends React.Component {
         } catch (error) {
             console.log(error.message)
             if (error.message === "Request failed with status code 401") {
-
+                this.props.navigation.navigate('Auth')
+                this.getChildList(resObject.studentId)
+                this._loadAsync()
             }
             console.log(error)
         }
@@ -199,9 +187,75 @@ export default class TimTableList extends React.Component {
         this.props.navigation.navigate('Auth')
     }
 
+    _renderItem = ({ item, index }) => {
+        console.log("rendering,", index, item)
+        return (
+            <View key={item.id} style={{ flexDirection: 'row' }}>
+                <Card
+                    containerStyle={[styles.cardViewStyleHor, { width: this.state.oriwidth - 10 }]}>
+                    <View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View><Ionicons name="ios-home" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
+                            <View>
+                                <Text style={styles.optionText}>{item.certificationBatchRep.batchName}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View><Ionicons name="ios-book" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
+                            <View>
+                                <Text style={styles.optionText}>{item.subjectRep.name}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View><Ionicons name="ios-time" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
+                            <View>
+                                <Text style={styles.optionText}>{item.periodRep.startTime} - {item.periodRep.endTime}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <View><Ionicons name="ios-people" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
+                            <View>
+                                <Text style={styles.optionText}>{item.teacherRep.name}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                            <View style={[
+                                { alignItems: 'flex-start', marginRight: 0, alignSelf: 'flex-start', marginTop: 20, }
+                            ]}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 15, }}>{this.state.clickDate}</Text>
+                            </View>
+                            <View style={[{
+                                alignItems: 'flex-end', marginRight: 0, alignSelf: 'flex-end',
+                                borderRadius: 5,
+                                shadowColor: '#000000',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2
+                                },
+                                shadowRadius: 10,
+                                shadowOpacity: 0.25,
+                                marginTop: 10,
+                            }]}>
+                                <Button
+                                    buttonStyle={{ backgroundColor: '#ff9900', height: 35, }}
+                                    titleStyle={{ fontSize: 15, }}
+                                    title='Get Attendance'
+                                    onPress={() =>
+                                        this.checkIn(item.id, item.certificationBatchRep.batchName, item.subjectRep.name, item.teacherRep.name)}
+                                />
+
+                            </View>
+                        </View>
+
+                    </View>
+                </Card>
+            </View>
+        );
+    }
 
     render() {
-        const { loading, dayOfweekList, calendarRepList, timetablelist, monthYear, calendar, datetimetable, clickDate } = this.state;
+        const { loading, dayOfweekList, calendarRepList, monthYear, calendar, } = this.state;
         if (loading) {
             return (
                 <View style={styles.loadingcontainer}>
@@ -242,27 +296,26 @@ export default class TimTableList extends React.Component {
 
                 {/* Header */}
                 <ScrollView>
-                    {
-                        calendar == true ? (
-                            <View style={[styles.flexrow, { justifyContent: 'center', alignItems: 'center' }]}>
-                                <Card
-                                    containerStyle={[styles.cardViewHeaderStyle, { width: this.state.oriwidth - 5, }]}>
-                                    <Text style={[styles.cardViewText, { fontWeight: 'bold', fontSize: 18 }]}>{monthYear}</Text>
-                                </Card>
-                            </View>
-                        ) : (null)
-                    }
-
                     <View>
+                        {
+                            calendar == true ?
+                                (
+                                    <View style={[styles.header, styles.cardViewHeaderStyle, { width: this.state.oriwidth - 8, height: 30, }]}>
+                                        <Text style={[styles.cardViewText, { fontWeight: 'bold', fontSize: 18, color: '#ff9900' }]}>
+                                            <PtSansCaption>{monthYear}</PtSansCaption></Text>
+
+                                    </View>
+                                ) : (null)
+                        }
                         <View style={styles.flexrow}>
                             <View style={{ flex: 1, flexDirection: 'row' }}>
                                 {
                                     dayOfweekList.map((item) => {
                                         return (
-                                            <View style={styles.flexcolumn}>
+                                            <View style={styles.flexcolumn} key={item}>
                                                 <Card
                                                     containerStyle={[styles.cardViewHeaderStyle, { width: this.state.cardwidth, height: this.state.cardheight, }]}>
-                                                    <Text style={styles.cardViewText}>{item}</Text>
+                                                    <Text style={[styles.cardViewText, { alignItems: 'center', color: '#ff9900' }]}><PtSansCaption>{item}</PtSansCaption></Text>
                                                 </Card>
                                             </View>
                                         )
@@ -285,16 +338,24 @@ export default class TimTableList extends React.Component {
                                                                 onPress={() => this.gettimetable(inneritem.date)}
                                                                 style={styles.flexcolumn} >
                                                                 <View >
-                                                                    <Card containerStyle={[styles.cardViewStyle, { width: this.state.cardwidth, height: this.state.cardheight + 7, }]}>
-                                                                        <Text style={styles.textStyle}>{inneritem.num}</Text>
+                                                                    <Card containerStyle={[styles.cardViewStyle, { width: this.state.cardwidth, height: this.state.cardheight + 7, backgroundColor: '#ff9900', borderColor: '#ff9900' }]}>
+                                                                        <Text style={[styles.textStyle,]}>{inneritem.num}</Text>
                                                                     </Card>
                                                                 </View>
                                                             </Touchable>
+                                                        ) : (inneritem.weekday == 'Sat' || inneritem.weekday == 'Sun' ? (
+                                                            <View style={styles.flexcolumn} key={inneritem.id}>
+                                                                <Card containerStyle={[styles.cardViewHeaderStyle, { width: this.state.cardwidth, height: this.state.cardheight + 7, backgroundColor: '#a6a6a6', borderColor: '#a6a6a6' }]}>
+                                                                    <Text style={styles.textStyle}>{inneritem.num}</Text>
+                                                                </Card>
+                                                            </View>
                                                         ) : (<View style={styles.flexcolumn} key={inneritem.id}>
-                                                            <Card containerStyle={[styles.cardViewHeaderStyle, { width: this.state.cardwidth, height: this.state.cardheight + 7, }]}>
+                                                            <Card containerStyle={[styles.cardViewHeaderStyle, { width: this.state.cardwidth, height: this.state.cardheight + 7, backgroundColor: '#fff', borderColor: '#fff' }]}>
                                                                 <Text style={styles.textStyle}>{inneritem.num}</Text>
                                                             </Card>
                                                         </View>)
+
+                                                            )
                                                     ) : (
                                                             <View style={styles.flexcolumn}></View>
                                                         )
@@ -308,97 +369,24 @@ export default class TimTableList extends React.Component {
                             }
 
                         </View>
-                        {
-                            datetimetable == true ? (
-                                <View
-                                    style={{
-                                        borderBottomColor: '#ff9900',
-                                        borderBottomWidth: 1,
-                                        marginVertical: 20,
-                                        marginHorizontal: 5
-                                    }}
-                                />
-                            ) : (null)
-                        }
-
-                        {/* horizontal slider*/}
-                        <View style={{ marginBottom: 10 }}>
-                            <Carousel
-                                hideIndicators={true}
-                                animate={false}>
-                                {
-                                    timetablelist.map(item => {
-                                        return (
-                                            <View key={item.id} style={{ flexDirection: 'row' }}>
-                                                <Card
-                                                    containerStyle={[styles.cardViewStyleHor, { width: this.state.oriwidth - 10 }]}>
-                                                    <View>
-                                                        <View style={{ flexDirection: 'row' }}>
-                                                            <View><Ionicons name="ios-home" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
-                                                            <View>
-                                                                <Text style={styles.optionText}>{item.certificationBatchRep.batchName}</Text>
-                                                            </View>
-                                                        </View>
-                                                        <View style={{ flexDirection: 'row' }}>
-                                                            <View><Ionicons name="ios-book" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
-                                                            <View>
-                                                                <Text style={styles.optionText}>{item.subjectRep.name}</Text>
-                                                            </View>
-                                                        </View>
-                                                        <View style={{ flexDirection: 'row' }}>
-                                                            <View><Ionicons name="ios-time" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
-                                                            <View>
-                                                                <Text style={styles.optionText}>{item.periodRep.startTime} - {item.periodRep.endTime}</Text>
-                                                            </View>
-                                                        </View>
-                                                        <View style={{ flexDirection: 'row' }}>
-                                                            <View><Ionicons name="ios-people" size={18} color="#ff9900" style={{ marginRight: 10 }} /></View>
-                                                            <View>
-                                                                <Text style={styles.optionText}>{item.teacherRep.name}</Text>
-                                                            </View>
-                                                        </View>
-                                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-
-                                                            <View style={[
-                                                                { alignItems: 'flex-start', marginRight: 0, alignSelf: 'flex-start', marginTop: 20, }
-                                                            ]}>
-                                                                <Text style={{ fontWeight: 'bold', fontSize: 15, }}>{clickDate}</Text>
-                                                            </View>
-                                                            <View style={[{
-                                                                alignItems: 'flex-end', marginRight: 0, alignSelf: 'flex-end',
-                                                                borderRadius: 5,
-                                                                shadowColor: '#000000',
-                                                                shadowOffset: {
-                                                                    width: 0,
-                                                                    height: 2
-                                                                },
-                                                                shadowRadius: 10,
-                                                                shadowOpacity: 0.25,
-                                                                marginTop: 10,
-                                                            }]}>
-                                                                <Button
-                                                                    buttonStyle={{ backgroundColor: '#ff9900', height: 35, }}
-                                                                    titleStyle={{ fontSize: 15, }}
-                                                                    title='Get Attendance'
-                                                                    onPress={() =>
-                                                                        this.checkIn(item.id, item.certificationBatchRep.batchName, item.subjectRep.name, item.teacherRep.name)}
-                                                                />
-
-                                                            </View>
-                                                        </View>
-
-                                                    </View>
-                                                </Card>
-                                            </View>
-                                        );
-                                    }
-                                    )
-                                }
-                            </Carousel>
-                        </View>
-
                     </View>
                 </ScrollView>
+
+                <View style={[styles.footer, { width: this.state.oriwidth - 20, }]}>
+                    <Carousel
+                        ref={(c) => { this._carousel = c; }}
+                        data={this.state.timetablelist}
+                        renderItem={this._renderItem.bind(this)}
+                        sliderWidth={this.state.oriwidth}
+                        itemWidth={this.state.oriwidth}
+                        layout={'default'}
+                        firstItem={0}
+                    />
+                </View>
+
+
+
+
             </View>
         );
     }
@@ -426,8 +414,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         alignContent: 'stretch',
-        marginTop: 2,
+        marginTop: 1,
     }, cardViewStyle: {
+        padding: 0,
         elevation: 7,
         shadowColor: '#000000',
         shadowOffset: {
@@ -436,17 +425,16 @@ const styles = StyleSheet.create({
         },
         shadowRadius: 10,
         shadowOpacity: 0.25,
-        backgroundColor: '#ff9900',
         borderRadius: 5,
         alignItems: 'center',
-        justifyContent: 'center',
-        borderColor: "#ff9900"
+        justifyContent: 'center', 
     }, cardViewHeaderStyle: {
+        padding: 0,
         elevation: 7,
         shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 2
+            height: 1
         },
         shadowRadius: 10,
         shadowOpacity: 0.25,
@@ -459,6 +447,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold',
     }, cardViewText: {
+        writingDirection: 'ltr',
         fontSize: 15,
     }, cardViewStyleHor: {
         elevation: 3,
@@ -472,9 +461,17 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         borderColor: "#ff9900",
         borderRadius: 5,
-    }, cardViewStyleMonth: {
-
-    },
+    }, header: {
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 5,
+        marginHorizontal: 4,
+    }, footer: {
+        marginHorizontal: 10,
+        marginBottom: 10, justifyContent: 'flex-end', alignItems: 'center',
+        justifyContent: 'center',
+    }
 
 });
 

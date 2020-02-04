@@ -15,6 +15,8 @@ import { Card } from 'react-native-elements';
 import { Platform } from '@unimodules/core';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from 'react-native-elements';
+import Loading from '../../components/Loading'
+import Constants from "expo-constants";
 
 const axios = require('axios');
 const BAR_HEIGHT = StatusBar.currentHeight;
@@ -47,7 +49,9 @@ export default class TimTableList extends React.Component {
         super(props);
 
         this.state = {
-            profileObj: {},
+            profileObj :{},
+            pstudentObj : {},
+            parentObj : {},
             width: Dimensions.get('window').width - 40,
             height: Dimensions.get('window').height,
             oriwidth: Dimensions.get('window').width,
@@ -70,6 +74,7 @@ export default class TimTableList extends React.Component {
     }
 
     _loadAsync = async () => {
+        this.setState({loading: true})
         const object = await AsyncStorage.getItem('studentObject');
         const resObject = JSON.parse(object);
         const token = resObject.token;
@@ -78,7 +83,7 @@ export default class TimTableList extends React.Component {
         const headers = {
             'Content-Type': 'application/json',
             'auth': token,
-            'schoolid': '2'
+            'schoolid': '9'
         }
 
         // try {
@@ -104,15 +109,23 @@ export default class TimTableList extends React.Component {
         //     console.log(error)
         // }
 
-
+        console.log('studentId', studentId)
         try {
-            const response = await axios.get('https://agkt-shmgmt.herokuapp.com/rest/student/' + studentId,
+            console.log('studentId', `${Constants.manifest.extra.baseUrl}student/${studentId}`)
+            const response = await axios.get(`${Constants.manifest.extra.baseUrl}student/${studentId}`,
                 { headers: headers });
-            console.log(response.data)
+
+            //destucturing
+
+            const {data}= response
+            console.log('data', data)
+            console.log(response.data.studentAccountRep.id+">>>>>>")
             if (this.mounted) {
                 this.setState({
                     loading: false,
-                    profileObj: response.data
+                    profileObj: data,
+                    pstudentObj : data.studentAccountRep,
+                    parentObj : data.parentAccountRep,
 
                 })
             }
@@ -134,7 +147,7 @@ export default class TimTableList extends React.Component {
         }
 
         const queryString = '?studentId=' + studentId
-        const response = await axios.get('http://192.168.100.6:8080/com.agkt.shmgmt.web.client/rest/parent/childAuth' + queryString,
+        const response = await axios.get(`${Constants.manifest.extra.baseUrl}/parent/childAuth` + queryString,
             { headers: headers });
 
         const studentObject = {};
@@ -149,28 +162,10 @@ export default class TimTableList extends React.Component {
 
 
     render() {
-        const { loading, profileObj } = this.state;
+        const { loading, profileObj ,pstudentObj,parentObj} = this.state;
         if (loading) {
             return (
-                <View style={styles.loadingcontainer}>
-                    {
-                        Platform.OS === 'ios' ?
-                            <View
-                                style={{
-                                    backgroundColor: '#00BCD4',
-                                    height: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight,
-                                }}>
-                                <StatusBar
-                                    translucent
-                                    backgroundColor="#00BCD4"
-                                    barStyle="dark-content"
-                                />
-                            </View>
-                            :
-                            <AppStatusBar barStyle="dark-content" />
-                    }
-                    <ActivityIndicator size="large" color="#ff9900" />
-                </View>
+                <Loading icon="name"/>
             )
         }
 
@@ -188,38 +183,80 @@ export default class TimTableList extends React.Component {
                         <AppStatusBar barStyle="dark-content" />
                 }
 
-                {/* Header */}
                 <ScrollView>
                     <View style={[styles.flexrow, { justifyContent: 'center', alignItems: 'center' }]}>
                         <Card
                             containerStyle={[styles.cardViewHeaderStyle, { width: this.state.oriwidth - 5, }]}>
-                            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                {
-                                    profileObj.photoUrl == "" ? (
-                                        <Image
-                                            source={require('../../assets/images/shichida.png')}
-                                            resizeMode="contain"
-                                            fadeDuration={0}
-                                            style={{ width: 100, height: 100, marginTop: 1, borderRadius: 50, }}
-                                        />
-                                    ) : (
+                        
+                            <View style={{ flex: 1,flexDirection : 'column' }}>
+                                <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                    {
+                                        profileObj.photoUrl == "" ? (
                                             <Image
-                                                source={{ uri: profileObj.photoUrl }}
+                                                source={require('../../assets/images/shichida.png')}
                                                 resizeMode="contain"
                                                 fadeDuration={0}
                                                 style={{ width: 100, height: 100, marginTop: 1, borderRadius: 50, }}
                                             />
-                                        )
-                                }
+                                        ) : (
+                                                <Image
+                                                    source={{ uri: profileObj.photoUrl }}
+                                                    resizeMode="contain"
+                                                    fadeDuration={0}
+                                                    style={{ width: 100, height: 100, marginTop: 1, borderRadius: 50, }}
+                                                />
+                                            )
+                                    }
 
-                                <Text style = {styles.profileTextStyle}>{profileObj.name}</Text>
+                                    <Text style={styles.profileTextStyle}>{profileObj.name}</Text>
+                                </View>
+
+                                <View style={{ alignItems:'flex-start',marginTop : 30, }}>
+                                    <Text style = {styles.labelText}>LocalId</Text>
+                                    <Text style ={styles.textStyle}>{profileObj.localId}</Text>
+                                </View>
+
+                                <View style={{ alignItems:'flex-start',marginTop : 10, }}>
+                                    <Text style = {styles.labelText}>LoginId</Text>
+                                    <Text style ={styles.textStyle}>{pstudentObj.email}</Text>
+                                </View>
+
+                                <View style={{ alignItems:'flex-start',marginTop : 10, }}>
+                                    <Text style = {styles.labelText}>Date Of Birth</Text>
+                                    <Text style ={styles.textStyle}>{pstudentObj.dateOfBath}</Text>
+                                </View>
+
+                                <View style={{  alignItems:'flex-start',marginTop : 10, }}>
+                                    <Text style = {styles.labelText}>NRC</Text>
+                                    <Text style ={styles.textStyle}>{pstudentObj.nrc}</Text>
+                                </View>
+
+                                <View style={{  alignItems:'flex-start',marginTop : 10, }}>
+                                    <Text style = {styles.labelText}>Phone No.</Text>
+                                    <Text style ={styles.textStyle}>{pstudentObj.phone1}</Text>
+                                </View>
+                                <View style={{  alignItems:'flex-start',marginTop : 10, }}>
+                                    <Text style = {styles.labelText}>Address</Text>
+                                    <Text style ={styles.textStyle}>{pstudentObj.address1}</Text>
+                                </View>
+
+                                <View style={{  alignItems:'flex-start',marginTop : 20, }}>
+                                    <Text style = {[styles.labelText,{color:'#ff9900'}]}>Parent Info</Text>
+                                </View>
+                                <View style={{  alignItems:'flex-start', marginTop : 10,}}>
+                                    <Text style = {styles.labelText}>Name</Text>
+                                    <Text style ={styles.textStyle}>{parentObj.userName}</Text>
+                                </View>
+                                <View style={{  alignItems:'flex-start',marginTop : 10,}}>
+                                    <Text style = {styles.labelText}>LoginId</Text>
+                                    <Text style ={styles.textStyle}>{parentObj.loginId}</Text>
+                                </View>
+
+
                             </View>
 
-                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                                <Text>Loµ</Text>
-                            </View>
                         </Card>
-                        
+
                     </View>
 
                 </ScrollView>
@@ -276,8 +313,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         backgroundColor: '#fff',
         borderRadius: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
         borderColor: "#fff"
     }, textStyle: {
         fontSize: 15,
@@ -297,11 +332,19 @@ const styles = StyleSheet.create({
         borderColor: "#ff9900",
         borderRadius: 5,
     }, profileTextStyle: {
-        fontSize : 18,
-        fontWeight : 'bold',
-        marginTop : 15,
-        color : '#ff9900'
-    },
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 15,
+        color: '#ff9900'
+    },labelText : {
+        fontSize : 16,
+        fontWeight : 'bold'
+    },textStyle : {
+        fontSize :15,
+        marginTop : 5,
+        color : '#828282',
+        fontWeight : 'bold'
+    }
 
 });
 

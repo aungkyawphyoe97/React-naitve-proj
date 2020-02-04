@@ -9,7 +9,13 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "extra": {
+      "baseUrl": "https://agkt-shmgmt.herokuapp.com/rest/",
+      "themeColor": "#FFFFFFFF",
+      "theme": "schoolOne"
+    },
+    
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/applogo.png",
     "splash": {
@@ -24,10 +30,12 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.marvellous.testapp",
       "supportsTablet": true
     },
     "android": {
-      "package": "com.shichida.student"
+      "package": "com.shichida.student",
+      "permissions": []
     }
   }
 }

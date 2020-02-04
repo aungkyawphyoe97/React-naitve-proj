@@ -123,6 +123,7 @@ export default class ChildList extends React.Component {
                                             shadowOpacity: 0.25,
                                             borderRadius: 4,
                                             padding: 1,
+                                            borderColor : '#fff'
                                         }
                                         ]}>
                                         <Text style={{ color: '#ff9900', fontSize: 18 }}>{item.name}</Text>

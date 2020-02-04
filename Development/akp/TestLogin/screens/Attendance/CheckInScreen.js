@@ -18,7 +18,6 @@ import { Card } from 'react-native-elements';
 
 const axios = require('axios');
 
-const BAR_HEIGHT = StatusBar.currentHeight;
 const AppStatusBar = ({ backgroundColor, ...props }) => {
     return (
         <View style={[styles.statusBar, backgroundColor]}>
